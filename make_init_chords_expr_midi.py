@@ -8,17 +8,17 @@ from itertools import product
 # same as silberstein
 _ticks_per_beat = 480
 _velocity = 64
-_bpm = 60
+_bpm = 120
 _tempo_microsec = mido.bpm2tempo(_bpm)
 
 _middle_c = 60
 _c3 = 48
 _subdiv = 1
 _sustain = 1.0
-_dur = 2
+_dur = 1
 _padding = 0
 
-MIDI_DIR = "midi2"
+MIDI_DIR = "midi3"
 def notedur_to_ticks(dur, subdiv = 1, ticks_per_beat = 480, sustain=1.0):
     on_dur = ticks_per_beat
     if dur != 4:
