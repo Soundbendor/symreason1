@@ -9,10 +9,8 @@ import torch
 MIDI_FOLDER = 'midi'
 MIDI_FOLDER2 = 'midi2'
 MIDI_FOLDER3 = 'midi3'
-midipath = os.path.join(MIDI_FOLDER, 'tpdt-inv0-major-idx0_0_0_0.mid')
-midipath2 = os.path.join(MIDI_FOLDER2, 'tpdt-inv0-major-idx0_0_0_0.mid')
-midipath3 = os.path.join(MIDI_FOLDER3, 'tpdt-inv0-major-idx0_0_0_0.mid')
 
+FOLDERS = [MIDI_FOLDER, MIDI_FOLDER2, MIDI_FOLDER3]
 model = AutoModelForCausalLM.from_pretrained(
     "loubb/aria-medium-base",
     trust_remote_code=True,
@@ -22,46 +20,46 @@ tokenizer = AutoTokenizer.from_pretrained(
     trust_remote_code=True,
 )
 
-prompt = tokenizer.encode_from_file(midipath, return_tensors='pt')
-prompt2 = tokenizer.encode_from_file(midipath2, return_tensors='pt')
-prompt3 = tokenizer.encode_from_file(midipath3, return_tensors='pt')
 
 # returns tensors keyed by 'input_ids' (int) and 'attention_masks' (bool)
 #print(prompt['input_ids'].shape, prompt['attention_masks'].shape)
 #model.config.output_hidden_states = True
 
-# don't pass attention masks since non_causal?
-outputs = model.forward(
-        input_ids = prompt['input_ids'],
-        output_hidden_states = True,
-        output_attentions = True,
-        return_dict = True
-        )
-outputs2 = model.forward(
-        input_ids = prompt2['input_ids'],
-        output_hidden_states = True,
-        output_attentions = True,
-        return_dict = True
-        )
-outputs3 = model.forward(
-        input_ids = prompt3['input_ids'],
-        output_hidden_states = True,
-        output_attentions = True,
-        return_dict = True
-        )
-
-
+prev = None
+first_time = True
+for mfile in os.listdir(MIDI_FOLDER):
+    for fol in FOLDERS:
+        midipath = os.path.join(fol, mfile)
+        prompt = tokenizer.encode_from_file(midipath, return_tensors='pt')
+        # don't pass attention masks since non_causal?
+        """
+        outputs = model.forward(
+                input_ids = prompt['input_ids'],
+                output_hidden_states = True,
+                output_attentions = True,
+                return_dict = True
+                )
+        """
+        cur_ids = prompt['input_ids'].flatten()
+        if first_time == True:
+            prev = cur_ids.clone()
+            first_time = False
+        else:
+            cur_isin = torch.isin(prev, cur_ids)
+            prev = prev[cur_isin].unique()
+        #print(cur_ids[:3], cur_ids[-3:])
+        print(fol, '0', torch.where(cur_ids == 0)[0])
+        print(fol, '17227', torch.where(cur_ids == 17227)[0])
+        print(fol, '17327', torch.where(cur_ids == 17327)[0])
 #print(outputs.keys())
 
-print(prompt['input_ids'].shape, prompt2['input_ids'].shape, prompt3['input_ids'].shape)
-print(torch.stack(outputs['hidden_states']).shape, torch.stack(outputs2['hidden_states']).shape, torch.stack(outputs3['hidden_states']).shape)
-torch.save(prompt['input_ids'], 'tpdt-inv0-major-idx0_0_0_0-tok1.pt')
-torch.save(prompt2['input_ids'], 'tpdt-inv0-major-idx0_0_0_0-tok2.pt')
-torch.save(prompt3['input_ids'], 'tpdt-inv0-major-idx0_0_0_0-tok3.pt')
-torch.save(torch.stack(outputs['hidden_states']), 'tpdt-inv0-major-idx0_0_0_0-hidden1.pt')
-torch.save(torch.stack(outputs2['hidden_states']), 'tpdt-inv0-major-idx0_0_0_0-hidden2.pt')
-torch.save(torch.stack(outputs3['hidden_states']), 'tpdt-inv0-major-idx0_0_0_0-hidden3.pt')
-
+print(prev)
+"""
+for k,v in tokenizer.get_vocab().items():
+    print(f"{k[0]},{k[1]},{v}")
+"""
+#print(prompt['input_ids'].shape, prompt2['input_ids'].shape, prompt3['input_ids'].shape)
+#print(torch.stack(outputs['hidden_states']).shape, torch.stack(outputs2['hidden_states']).shape, torch.stack(outputs3['hidden_states']).shape)
 #print(type(model))
 #print(dir(model.config))
 #print(type(tokenizer))
