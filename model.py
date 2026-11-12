@@ -41,16 +41,17 @@ for mfile in os.listdir(MIDI_FOLDER):
                 )
         """
         cur_ids = prompt['input_ids'].flatten()
-        if first_time == True:
+        if first_time == True and fol != MIDI_FOLDER:
             prev = cur_ids.clone()
             first_time = False
-        else:
+        elif fol != MIDI_FOLDER:
             cur_isin = torch.isin(prev, cur_ids)
             prev = prev[cur_isin].unique()
         #print(cur_ids[:3], cur_ids[-3:])
-        print(fol, '0', torch.where(cur_ids == 0)[0])
-        print(fol, '17227', torch.where(cur_ids == 17227)[0])
-        print(fol, '17327', torch.where(cur_ids == 17327)[0])
+        #print(fol, '0', torch.where(cur_ids == 0)[0])
+        #print(fol, '17227', torch.where(cur_ids == 17227)[0])
+        #print(fol, '17327', torch.where(cur_ids == 17327)[0])
+        print(fol, '5', torch.where(cur_ids == 5)[0])
 #print(outputs.keys())
 
 print(prev)
