@@ -1,0 +1,9 @@
+bos_token,<S>
+eos_token,<E>
+unk_token,<U>
+sep_token,None
+pad_token,<P>
+cls_token,None
+mask_token,None
+extra_special_tokens,{}
+split_special_tokens,False

@@ -55,6 +55,17 @@ for mfile in os.listdir(MIDI_FOLDER):
 
 print(prev)
 """
+print('bos_token', tokenizer.bos_token)
+print('eos_token', tokenizer.eos_token)
+print('unk_token', tokenizer.unk_token)
+print('sep_token',tokenizer.sep_token)
+print('pad_token', tokenizer.pad_token)
+print('cls_token',tokenizer.cls_token)
+print('mask_token', tokenizer.mask_token)
+print('extra_special_tokens',tokenizer.extra_special_tokens)
+print('split_special_tokens',tokenizer.split_special_tokens)
+"""
+"""
 for k,v in tokenizer.get_vocab().items():
     print(f"{k[0]},{k[1]},{v}")
 """
