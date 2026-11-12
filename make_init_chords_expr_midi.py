@@ -1,21 +1,24 @@
 import mido, os
 import chords as CH
+from itertools import product
 
+# silberstein groups all sounding notes per step=16th note
+# writes one row of csv per step, carries over previous step's chord if no new chord
 
 # same as silberstein
 _ticks_per_beat = 480
 _velocity = 64
-_bpm = 120
+_bpm = 60
 _tempo_microsec = mido.bpm2tempo(_bpm)
 
 _middle_c = 60
 _c3 = 48
 _subdiv = 1
 _sustain = 1.0
-_dur = 4.
+_dur = 2
 _padding = 0
 
-MIDI_DIR = "midi"
+MIDI_DIR = "midi2"
 def notedur_to_ticks(dur, subdiv = 1, ticks_per_beat = 480, sustain=1.0):
     on_dur = ticks_per_beat
     if dur != 4:
@@ -36,21 +39,28 @@ on_dur, off_dur = notedur_to_ticks(_dur, subdiv = _subdiv, ticks_per_beat = _tic
 prog_dict = {}
 for mode in ['major', 'minor']:
     chord_dict = CH.major_triad_diatonic if mode == "major" else CH.minor_triad_harmonic
-    for prog in CH.chord_cat_prog:
-        for short_chord_cat in prog:
-            chord_cat = CH.chord_cat_abbrev[short_chord_cat]
-            chord_arr = []
-            for cur_roman in CH.chord_cat[chord_cat][mode]:
-                chord_tup = chord_dict[cur_roman]
-                cur_bass = _c3 + chord_tup[0]
-                cur_notes = CH.triads[chord_tup[1]] 
-                cur_triad = [(_middle_c + x) for x in cur_notes]
-                for inv in [0, 1]:
+    for cat_prog in CH.chord_cat_prog:
+        for inv in [0, 1, 2]:
+            
+            chord_cats_long = [CH.chord_cat_abbrev[x] for x in cat_prog]
+            # get array of chords for each category and index each possibility of chord category (for naming)
+            cur_idxed_roman_opts = [[(i,y) for (i,y) in enumerate(CH.chord_cat[x][mode])] for x in chord_cats_long]
+            # iterate over all combinations of chords for each category
+            for chord_prog in product(*cur_idxed_roman_opts):
+                chord_arr = []
+                idx_str = '_'.join([str(x[0]) for x in chord_prog])
+                cur_romans = [x[1] for x in chord_prog]
+                for cur_roman in cur_romans:
+                    chord_tup = chord_dict[cur_roman]
+                    cur_root = chord_tup[0]
+                    cur_bass = _c3 + cur_root
+                    cur_notes = CH.triads[chord_tup[1]] 
+                    cur_triad = [(_middle_c + cur_root + x) for x in cur_notes]
                     note_arr = []
                     note_arr.append(cur_bass)
                     note_arr += CH.invert_triad(cur_triad, inv)
                     chord_arr.append(note_arr)
-                    prog_dict[f"{prog}-inv{inv}-{mode}"] = chord_arr
+                prog_dict[f"{cat_prog}-inv{inv}-{mode}-idx{idx_str}"] = chord_arr
 
 
 for cur_name, cur_notes_arr in prog_dict.items():

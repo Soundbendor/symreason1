@@ -68,7 +68,7 @@ def invert_triad(triad, inv):
     if inv == 1:
         return (triad[1:] + [triad[0] + 12])
     elif inv == 2:
-        return (triad[-1] + [triad[0] + 12, triad[1] + 12])
+        return ([triad[-1]] + [triad[0] + 12, triad[1] + 12])
     else:
         return triad
 
