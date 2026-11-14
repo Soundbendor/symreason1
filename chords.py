@@ -8,35 +8,35 @@ triads = {
         }
 
 major_triad_diatonic = {
-        'I': (0, 'major'),
-        'ii': (2, 'minor'),
-        'iii': (4, 'minor'),
-        'IV': (5, 'major'),
-        'V': (7, 'major'),
-        'vi': (9, 'minor'),
-        'vii^o': (11, 'dim')
+        'I': (0, 0, 'major'),
+        'ii': (2, 1, 'minor'),
+        'iii': (4, 2, 'minor'),
+        'IV': (5, 3, 'major'),
+        'V': (7, 4, 'major'),
+        'vi': (9, 5, 'minor'),
+        'vii^o': (11, 6, 'dim')
         }
 
 
 minor_triad_harmonic = {
-        'i': (0, 'minor'),
-        'ii^o': (2, 'dim'),
-        'III': (3, 'major'),
-        'iv': (5, 'minor'),
-        'V': (7, 'major'),
-        'VI': (8, 'major'),
-        'vii^o': (11, 'dim')
+        'i': (0, 0, 'minor'),
+        'ii^o': (2, 1, 'dim'),
+        'III': (3, 2, 'major'),
+        'iv': (5, 3, 'minor'),
+        'V': (7, 4, 'major'),
+        'VI': (8, 5, 'major'),
+        'vii^o': (11, 6, 'dim')
         }
 
 
 minor_triad_diatonic = {
-        'i': (0, 'minor'),
-        'ii^o': (2, 'dim'),
-        'III': (3, 'major'),
-        'iv': (5, 'minor'),
-        'v': (7, 'minor'),
-        'VI': (8, 'major'),
-        'VII': (10, 'major')
+        'i': (0, 0,'minor'),
+        'ii^o': (2, 1, 'dim'),
+        'III': (3, 2, 'major'),
+        'iv': (5, 3, 'minor'),
+        'v': (7, 4, 'minor'),
+        'VI': (8, 5, 'major'),
+        'VII': (10, 6, 'major')
         }
 
 chord_cat = {
@@ -72,6 +72,4 @@ def invert_triad(triad, inv):
         return ([triad[-1]] + [triad[0] + 12, triad[1] + 12])
     else:
         return triad
-
-
 
