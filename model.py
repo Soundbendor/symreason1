@@ -11,6 +11,7 @@ MIDI_FOLDER2 = 'midi2'
 MIDI_FOLDER3 = 'midi3'
 
 FOLDERS = [MIDI_FOLDER, MIDI_FOLDER2, MIDI_FOLDER3]
+FOLDERS = [MIDI_FOLDER]
 model = AutoModelForCausalLM.from_pretrained(
     "loubb/aria-medium-base",
     trust_remote_code=True,
@@ -20,7 +21,8 @@ tokenizer = AutoTokenizer.from_pretrained(
     trust_remote_code=True,
 )
 
-
+vocab_dict = {int(v):k for (k,v) in tokenizer.get_vocab().items()}
+#print(vocab_dict)
 # returns tensors keyed by 'input_ids' (int) and 'attention_masks' (bool)
 #print(prompt['input_ids'].shape, prompt['attention_masks'].shape)
 #model.config.output_hidden_states = True
@@ -32,29 +34,37 @@ for mfile in os.listdir(MIDI_FOLDER):
         midipath = os.path.join(fol, mfile)
         prompt = tokenizer.encode_from_file(midipath, return_tensors='pt')
         # don't pass attention masks since non_causal?
-        """
         outputs = model.forward(
                 input_ids = prompt['input_ids'],
                 output_hidden_states = True,
                 output_attentions = True,
                 return_dict = True
                 )
-        """
         cur_ids = prompt['input_ids'].flatten()
+        """
         if first_time == True and fol != MIDI_FOLDER:
             prev = cur_ids.clone()
             first_time = False
         elif fol != MIDI_FOLDER:
             cur_isin = torch.isin(prev, cur_ids)
             prev = prev[cur_isin].unique()
+        """
+        if first_time == True:
+            cur = [(x.item(), vocab_dict[x.item()]) for x in cur_ids]
+            print(cur)
+            first_time = False
+            break
+
+        # output is of size (num_layers, batch_size, seqlen, dimension)
+        print(torch.stack(outputs['hidden_states']).shape)
         #print(cur_ids[:3], cur_ids[-3:])
         #print(fol, '0', torch.where(cur_ids == 0)[0])
         #print(fol, '17227', torch.where(cur_ids == 17227)[0])
         #print(fol, '17327', torch.where(cur_ids == 17327)[0])
-        print(fol, '5', torch.where(cur_ids == 5)[0])
+        #print(fol, '5', torch.where(cur_ids == 5)[0])
 #print(outputs.keys())
 
-print(prev)
+#print(prev)
 """
 print('bos_token', tokenizer.bos_token)
 print('eos_token', tokenizer.eos_token)

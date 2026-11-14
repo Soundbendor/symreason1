@@ -14,10 +14,10 @@ _tempo_microsec = mido.bpm2tempo(_bpm)
 
 _subdiv = 1
 _sustain = 1.0
-_dur = 4
+_dur = 1
 _padding = 0
 
-MIDI_DIR = "midi"
+MIDI_DIR = "midi3"
 def notedur_to_ticks(dur, subdiv = 1, ticks_per_beat = 480, sustain=1.0):
     on_dur = ticks_per_beat
     if dur != 4:
