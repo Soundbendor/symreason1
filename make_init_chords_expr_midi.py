@@ -21,8 +21,7 @@ _padding = 0
 MIDI_DIR = "midi"
 CSV_DIR = "midi_csv"
 
-bass_note_arr = ['c3', 'cs3', 'd3', 'ds3', 'e3', 'f3', 'fs3', 'g3', 'gs3', 'a3', 'as3', 'b3']
-data_keys = ['chord_roman', 'chord_cat', 'chord_inv', 'chord_scaledeg', 'note_num_total', 'note_num_chord']
+data_keys = ['chord_roman', 'chord_cat', 'chord_cat_int', 'chord_inv', 'chord_scaledeg', 'note_num_total', 'note_num_chord']
 prog_dict = {}
 
 write_csv = True
@@ -47,7 +46,7 @@ on_dur, off_dur = notedur_to_ticks(_dur, subdiv = _subdiv, ticks_per_beat = _tic
 
 for mode in ['major', 'minor']:
     chord_dict = CH.major_triad_diatonic if mode == "major" else CH.minor_triad_harmonic
-    for bidx, bass_note in enumerate(bass_note_arr):
+    for bidx, bass_note in enumerate(CH.bass_note_arr):
         bass_midi = MNC.note_to_midi(bass_note)
         root_midi = bass_midi + 12
         for cat_prog in CH.chord_cat_prog:
@@ -82,6 +81,7 @@ for mode in ['major', 'minor']:
                         data_dict['note_num_total'] += [(note_num_total + x) for x in range(num_notes)]
                         data_dict['chord_roman'] += ([cur_roman] * num_notes)
                         data_dict['chord_cat'] += ([cat_prog[ridx]] * num_notes)
+                        data_dict['chord_cat_int'] += ([CH.chord_cat_to_int[cat_prog[ridx]]] * num_notes)
                         data_dict['chord_inv'] += ([inv] * num_notes)
                         data_dict['chord_scaledeg'] += ([cur_scaledeg] * num_notes)
 

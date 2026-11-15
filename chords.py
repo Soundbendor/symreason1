@@ -1,4 +1,5 @@
 
+bass_note_arr = ['c3', 'cs3', 'd3', 'ds3', 'e3', 'f3', 'fs3', 'g3', 'gs3', 'a3', 'as3', 'b3']
 
 triads = {
         'major': [0,4,7],
@@ -62,8 +63,10 @@ chord_cat_prog = [
         ]
 """
 
+
 chord_cat_prog = ["tpdt", "tttt", "tdtt", "ttdt", "ttpt", "pdtt"]
 
+chord_cat_to_int = {'t': 0, 'p': 1, 'd': 2, 'o': 3}
 
 def invert_triad(triad, inv):
     if inv == 1:
