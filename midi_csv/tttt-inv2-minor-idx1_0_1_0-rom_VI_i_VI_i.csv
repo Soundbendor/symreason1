@@ -1,0 +1,17 @@
+chord_roman,chord_cat,chord_cat_int,chord_inv,chord_scaledeg,note_num_total,note_num_chord
+VI,t,0,2,5,0,0
+VI,t,0,2,5,1,1
+VI,t,0,2,5,2,2
+VI,t,0,2,5,3,3
+i,t,0,2,0,4,0
+i,t,0,2,0,5,1
+i,t,0,2,0,6,2
+i,t,0,2,0,7,3
+VI,t,0,2,5,8,0
+VI,t,0,2,5,9,1
+VI,t,0,2,5,10,2
+VI,t,0,2,5,11,3
+i,t,0,2,0,12,0
+i,t,0,2,0,13,1
+i,t,0,2,0,14,2
+i,t,0,2,0,15,3
