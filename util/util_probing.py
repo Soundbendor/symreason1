@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 # 0 = start, 1 = end, 5 = <T>, 6-38 = prefixes
 FILT_TOKENS = torch.concat((torch.tensor([0,1,5]), torch.arange(6,39)))
@@ -36,3 +37,22 @@ def filter_hidden(hidden, tokenized, triple_token_idx = -1,  filt_tokens = FILT_
         return reshape_as_triple(cur_filt)
     else:
         return get_idx_of_triple(cur_filt)
+
+# input torch, output numpy
+# predictions are probability dists, convert to index
+def accumulate_truths_preds(truths, truths_to_add, preds, preds_to_add, batch_idx):
+    new_truths = truths_to_add.detach().cpu().numpy().flatten()
+    new_preds = torch.argmax(preds_to_add,axis=1).detach().cpu().numpy().flatten()
+
+    # first time through, just return new truths and preds
+    if batch_idx == 0:
+        return new_truths, new_preds
+    else:
+        # The base of an array that owns its memory is None
+        # (and want to own own memory, so deep copy if not)
+        # (doesn't work if truths is None, first time around)
+        if truths.base is None and preds.base is None:
+            return np.hstack((truths,new_truths)), np.hstack((preds, new_preds))
+        else:
+            return np.hstack((copy.deepcopy(truths),new_truths)), np.hstack((copy.deepcopy(preds), new_preds))
+
