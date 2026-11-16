@@ -56,3 +56,6 @@ def accumulate_truths_preds(truths, truths_to_add, preds, preds_to_add, batch_id
         else:
             return np.hstack((copy.deepcopy(truths),new_truths)), np.hstack((copy.deepcopy(preds), new_preds))
 
+#torch.save(model_dict, save_path)
+#model.load_state_dict(torch.load(save_path, map_location=device, weights_only = False))
+

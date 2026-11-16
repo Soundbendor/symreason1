@@ -1,11 +1,11 @@
 import os, pickle
 import optuna
-
+from pathlib import Path
 
 search_space = {
         'layer_idx': list(range(17)),
         'lr_exp': [-1, -2, -3, -4],
-        'batch_size': [2048, 4196]
+        'batch_size': [1024,2048]
         }
 
 SAMPLER_FOLDER = os.path.join(Path(__file__).resolve().parent.parent, 'sampler')
@@ -19,7 +19,7 @@ def study_callback(study, trial):
 
 def create_study_name(parser_args, seed):
     by_cat_int = int(parser_args.by_category)
-    return f'{bc{by_cat_int}-tti_{parser_args.triple_token_idx}-s{seed}-{parser_args.suffix}'
+    return f"bc_{by_cat_int}-tti_{parser_args.triple_token_idx}-s_{seed}-{parser_args.suffix}"
 
 def record_dict_in_study(studydict, cur_dict):
     flat_dict = UMN.dict_arrayargs_to_str(cur_dict)

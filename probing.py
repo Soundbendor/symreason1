@@ -6,16 +6,20 @@ from linear_probe import LinearProbe
 from probe_dataset import ProbeDataset
 
 import util.util_data as UD
+import util.util_optuna as UO
 from functools import partial
 from distutils.util import strtobool
+from pathlib import Path
 import os, sys, time, argparse, copy
 
 
 SEED = 39
 MIDI_FOLDER = os.path.join(Path(__file__).resolve().parent, 'midi')
 MIDI_CSV_FOLDER = os.path.join(Path(__file__).resolve().parent, 'midi_csv')
+GRAPH_FOLDER = os.path.join(Path(__file__).resolve().parent, 'graph')
 SHARE_PATH = os.path.join(os.sep, 'nfs','hpc', 'share', 'kwand') 
-ACT_PATH = os.path.join(SHARE_PATH, 'symreason1')
+ACT_FOLDER = os.path.join(SHARE_PATH, 'symreason1_acts')
+MODEL_FOLDER = os.path.join(SHARE_PATH, 'symreason1_model')
 
 def set_torch_seed(seed):
     torch.manual_seed(seed)
@@ -83,7 +87,7 @@ def valid_test_model(model, valid_size, generator, loss_fn, valid_subset, batch_
 
 
 
-def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = False, device='cpu'):
+def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = False, suffix=1, device='cpu'):
 
 
     params = {
@@ -100,7 +104,7 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
 
     layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
     lr_exp = trial.suggest_int('learning_rate_exp', -4, -1, step=1)
-    batch_size = trial.suggest_categorical('batch_size', [2048, 4196])
+    batch_size = trial.suggest_categorical('batch_size', [1024,2048])
 
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
@@ -112,8 +116,13 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
     train_avg_nlls = []
     actual_training_epochs = float('inf')
 
-    
-    model = LinearProbe(in_dim =1536, hidden_dims = [], out_dim = 10)
+    out_dim = 3
+    if by_category == False:
+        out_dim = 7
+    in_dim = 1536
+    if triple_token_idx < 0:
+        in_dim *= 3
+    model = LinearProbe(in_dim =1536, hidden_dims = [], out_dim = out_dim)
 
     # init rng
     torch_gen = torch.Generator(device=device)
@@ -136,6 +145,7 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
         valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], cur_valid_size, torch_gen, valid_loss_fn, cur_valid_subset, batch_size=batch_size, shuffle = True, device=device)
         valid_nlls.append(valid_avg_loss)
         train_avg_nlls.append(train_avg_loss)
+        trial.report(valid_avg_loss, step = epoch_idx)
         # early stopping
         if using_early_stopping == False:
             best_loss = valid_loss
@@ -156,6 +166,7 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
                 # end of training, just report what you have
                 actual_training_epochs = epoch_idx + 1
                 best_loss = valid_loss
+                best_model_dict = copy.deepcopy(model.state_dict())
 
 
     # bookkeeping
@@ -166,6 +177,12 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
     for k,v in params.items():
         trial.set_user_attr(key=k, value=v)
     
+    layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
+    lr_exp = trial.suggest_int('learning_rate_exp', -4, -1, step=1)
+    batch_size = trial.suggest_categorical('batch_size', [2048, 4196])
+ 
+    by_cat_int = int(by_category)
+    torch.save(model_dict, os.path.join(MODEL_FOLDER, f"l_{layer_idx}-lrexp_{lr_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}.pt"))
     return best_loss
 
 
@@ -175,6 +192,8 @@ if __name__ == "__main__":
     parser.add_argument("-sf", "--suffix", type=int, default=1, help="suffix")
     parser.add_argument("-rs", "--restart_study", type=strtobool, default=False, help="force restart of optuna study")
     parser.add_argument("-bc", "--by_category", type=strtobool, default=False, help="by category")
+    parser.add_argument("-cu", "--use_cuda", type=strtobool, default=True, help="use cuda")
+    parser.add_argument("-db", "--debug", type=strtobool, default=False, help="debug")
     parser.add_argument("-tti", "--triple_token_idx", type=int, default=-1, help="triple token index")
     args = parser.parse_args()
 
@@ -187,17 +206,23 @@ if __name__ == "__main__":
         set_torch_seed(SEED)
     
     np_rng = np.random.default_rng(SEED)
-    data_df = UD.get_dataset_df(ACT_PATH)
+
+    if args.debug == True:
+        exit()
+    data_df = UD.get_dataset_df(ACT_FOLDER)
     # do splits by key with 6/3/3
     train_df, valid_df, test_df = UD.get_dataset_splits(data_df, CH.bass_note_arr,rng)
 
     train_csvs = UD.get_csv_dfs(train_df, MIDI_CSV_FOLDER)
     valid_csvs = UD.get_csv_dfs(valid_df, MIDI_CSV_FOLDER)
-    train_ds = ProbeDataset(data_df=train_df, csv_dfs=train_csvs, layer_idx=0, from_dir = ACT_PATH , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
-    valid_ds = ProbeDataset(data_df=valid_df, csv_dfs=valid_csvs, layer_idx=0, from_dir = ACT_PATH , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
+    train_ds = ProbeDataset(data_df=train_df, csv_dfs=train_csvs, layer_idx=0, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
+    valid_ds = ProbeDataset(data_df=valid_df, csv_dfs=valid_csvs, layer_idx=0, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
 
     # optuna stuff
     studydict = UO.create_or_load_study(args, seed, evaluation = False)
-    objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, device=device)
+    objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
     callback_arr = [UO.study_callback]
     studydict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
+    cur_studyname = studydict['study_name']
+    fig = optuna.visualization.plot_intermediate_values(studydict['study'])
+    fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))

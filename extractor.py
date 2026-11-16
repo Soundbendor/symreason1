@@ -8,7 +8,7 @@ from pathlib import Path
 
 MIDI_FOLDER = os.path.join(Path(__file__).resolve().parent, 'midi')
 SHARE_PATH = os.path.join(os.sep, 'nfs','hpc', 'share', 'kwand') 
-ACT_PATH = os.path.join(SHARE_PATH, 'symreason1')
+ACT_FOLDER = os.path.join(SHARE_PATH, 'symreason1_acts')
 
 model = AutoModelForCausalLM.from_pretrained(
     "loubb/aria-medium-base",
