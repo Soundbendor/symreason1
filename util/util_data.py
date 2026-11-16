@@ -1,14 +1,15 @@
 import polars as pl
 import os
 
-fname_keys = ['fname', 'csv_basename', 'bass_note', 'prog', 'inv', 'mode', 'idx']
+fname_keys = ['basename', 'csv_basename', 'bass_note', 'prog', 'inv', 'mode', 'idx']
 def get_dataset_df(fdir):
     midifiles = os.listdir(fdir)
     data = {k: [] for k in fname_keys}
     for f in midifiles:
-        cur_split = f.split('.')[0].split('-')
+        cur_basename = f.split('.')[0]
+        cur_split = cur_basename.split('-')
         csv_basename = '-'.join(cur_split[1:])
-        data['fname'].append(f)
+        data['basename'].append(f'{cur_basename}')
         data['csv_basename'].append(csv_basename)
         data['bass_note'].append(cur_split[0])
         data['prog'].append(cur_split[1])

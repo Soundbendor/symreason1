@@ -56,14 +56,15 @@ for mode in ['major', 'minor']:
                 # get array of chords for each category and index each possibility of chord category (for naming)
                 cur_idxed_roman_opts = [[(i,y) for (i,y) in enumerate(CH.chord_cat[x][mode])] for x in chord_cats_long]
 
-                # for csv making
-                data_dict = {k: [] for k in data_keys}
-                note_num_total = 0
                 # iterate over all combinations of chords for each category
                 for chord_prog in product(*cur_idxed_roman_opts):
+                    # for csv making
+                    data_dict = {k: [] for k in data_keys}
+                    note_num_total = 0
                     chord_arr = []
                     idx_str = '_'.join([str(x[0]) for x in chord_prog])
                     cur_romans = [x[1] for x in chord_prog]
+                    romans_str = '_'.join(cur_romans)
                     for ridx, cur_roman in enumerate(cur_romans):
                         chord_tup = chord_dict[cur_roman]
                         cur_root = chord_tup[0]
@@ -87,7 +88,7 @@ for mode in ['major', 'minor']:
 
                         # bookkeeping
                         note_num_total += num_notes
-                    prog_str = f"{cat_prog}-inv{inv}-{mode}-idx{idx_str}"
+                    prog_str = f"{cat_prog}-inv{inv}-{mode}-idx{idx_str}-rom_{romans_str}"
                     if bidx == 0 and write_csv == True:
                         cur_df = pl.DataFrame(data_dict)
                         cur_df.write_csv(os.path.join(CSV_DIR, f'{prog_str}.csv'))

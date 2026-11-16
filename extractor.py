@@ -35,8 +35,12 @@ for mfile in os.listdir(MIDI_FOLDER):
             output_attentions = True,
             return_dict = True
             )
-    cur_ids = prompt['input_ids'].flatten()
+    # first dim is batch_size and we're doing one at a time
+    cur_ids = prompt['input_ids'].squeeze(0)
     
-    cur_hidden = torch.stack(outputs['hidden_states'])
-    torch.save(cur_hidden, os.path.join(ACT_PATH, f'{cur_name}.pt'))
+    # dimension (layers, batch_size, seqlen, dim)
+    # so squeeze first dim to get (layers, seqlen, dim)
+    cur_hidden = torch.stack(outputs['hidden_states']).squeeze(1)
+    torch.save(cur_ids, os.path.join(ACT_PATH, f'{cur_name}-tokens.pt'))
+    torch.save(cur_hidden, os.path.join(ACT_PATH, f'{cur_name}-hidden.pt'))
 

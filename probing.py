@@ -28,11 +28,7 @@ def train_model(model, mean, stdev, train_size, generator, opt_fn, loss_fn, trai
     for batch_idx, data in enumerate(train_dl):
         opt_fn.zero_grad() 
         _ipt, ground_truth = data
-        ipt = None
-        if nstd == False:
-            ipt = (_ipt - mean)/stdev
-        else:
-            ipt = (_ipt - mean)
+        
 
 
         model_pred = model(ipt)
