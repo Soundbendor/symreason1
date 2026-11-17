@@ -1,7 +1,5 @@
 import argparse
 from pathlib import Path
-from util import util_main as UMN
-from util import util_constants as UC
 
 from distutils.util import strtobool
 import os, time, subprocess
