@@ -122,7 +122,7 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
     in_dim = 1536
     if triple_token_idx < 0:
         in_dim *= 3
-    model = LinearProbe(in_dim =1536, hidden_dims = [], out_dim = out_dim)
+    model = LinearProbe(in_dim =in_dim, hidden_dims = [], out_dim = out_dim)
 
     # init rng
     torch_gen = torch.Generator(device=device)
