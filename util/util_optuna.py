@@ -46,7 +46,7 @@ def create_or_load_study(parser_args, seed, evaluation = False):
         cur_sampler = optuna.samplers.GridSampler(search_space, seed=seed)
 
     if evaluation == False:
-        ret['study'] = optuna.create_study(study_name=cur_study_name, sampler = cur_sampler, storage=rdb_url, direction=UC.OPT_DIRECTION, load_if_exists = (resuming == True and parser_args.restart_study == False))
+        ret['study'] = optuna.create_study(study_name=cur_study_name, sampler = cur_sampler, storage=rdb_url, direction=OPT_DIRECTION, load_if_exists = (resuming == True and parser_args.restart_study == False))
         ret['study'].set_user_attr('sampler_filepath', sampler_filepath)
     return ret
 
