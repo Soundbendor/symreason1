@@ -5,7 +5,6 @@ from pathlib import Path
 search_space = {
         'layer_idx': list(range(17)),
         'lr_exp': [-1, -2, -3, -4],
-        'batch_size': [128,256,512],
         'wd_exp': [-2,-3,-4]
         }
 

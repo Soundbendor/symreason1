@@ -96,6 +96,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             'early_stopping_check_interval': 25,
             'early_stopping_patience': 1,
             'num_epochs': 250,
+            'batch_size': 256,
             'patience_delta': 10**(-5),
             'train_size': len(train_ds),
             'valid_size': len(valid_ds),
@@ -105,7 +106,6 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             }
 
     lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
-    batch_size = trial.suggest_categorical('batch_size', [128,256,512])
     wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
     
     # other init
@@ -151,8 +151,8 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
 
     for epoch_idx in range(params['num_epochs']):
         # train/valid
-        train_avg_loss = train_model(model, params['train_size'], torch_gen, opt_fn, train_loss_fn, train_ds, batch_size=batch_size, shuffle = True, device=device)
-        valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], cur_valid_size, torch_gen, valid_loss_fn, valid_ds, batch_size=batch_size, shuffle = True, device=device)
+        train_avg_loss = train_model(model, params['train_size'], torch_gen, opt_fn, train_loss_fn, train_ds, batch_size=params['batch_size'], shuffle = True, device=device)
+        valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], cur_valid_size, torch_gen, valid_loss_fn, valid_ds, batch_size=params['batch_size'], shuffle = True, device=device)
         valid_nlls.append(valid_avg_loss)
         train_avg_nlls.append(train_avg_loss)
         trial.report(valid_avg_loss, step = epoch_idx)
@@ -184,7 +184,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     params['best_loss'] = best_loss
     params['actual_training_epochs'] = actual_training_epochs
     params['train_avg_nlls'] = train_avg_nlls
-    params['model_savename'] = f"l_{layer_idx}-lrexp_{lr_exp}-wdexp_{wd_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}"
+    params['model_savename'] = f"l_{layer_idx}-lrexp_{lr_exp}-wdexp_{wd_exp}-bs_{params['batch_size']}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}"
     for k,v in params.items():
         trial.set_user_attr(key=k, value=v)
  
