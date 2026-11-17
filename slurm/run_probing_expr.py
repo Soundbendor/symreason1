@@ -59,7 +59,7 @@ if __name__ == "__main__":
         slurm_strarr2.append(f"#SBATCH -w {args.node}")
     slurm_strarr3 = [f"#SBATCH --mem={args.ram_mem}G", f"#SBATCH --gres=gpu:{args.gpus}", f"#SBATCH -t {args.num_days}-00:00:00", f"#SBATCH --job-name={job_str}", "#SBATCH --export=ALL", f"#SBATCH --output=/nfs/guille/eecs_research/soundbendor/kwand/out_symr1prb/{job_str}-%j.out", ""]
     slurm_strarr = slurm_strarr1 + slurm_strarr2 + slurm_strarr3
-    p_str = f"python {py_path} --suffix {args.suffix} --eval {args.eval} --restart_study {args.restart_study} --by_category {args.by_category} --use_cda {args.use_cuda} --debug {args.debug} --triple_token_idx {args.triple_token_idx}" 
+    p_str = f"python {py_path} --suffix {args.suffix} --eval {args.eval} --restart_study {args.restart_study} --by_category {args.by_category} --use_cuda {args.use_cuda} --debug {args.debug} --triple_token_idx {args.triple_token_idx}" 
     slurm_strarr.append(p_str)
     script_fname = f"{start_time}_{job_str}.sh"
     script_path = os.path.join(sh_dir, script_fname)
