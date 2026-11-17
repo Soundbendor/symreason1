@@ -32,8 +32,6 @@ if __name__ == "__main__":
     script_idx = 0
     start_time = str(int(time.time() * 1000))
 
-    cur_normalize = True
-    size_short = UC.MODEL_SIZES_SHORT[model_size]         
     job_str = f'extr'
     slurm_strarr1 = ["#!/bin/bash"]
     slurm_strarr2 = [f"#SBATCH -p {args.partition}"]
