@@ -224,7 +224,7 @@ if __name__ == "__main__":
     valid_ds = ProbeDataset(data_df=valid_df, csv_dfs=valid_csvs, layer_idx=0, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
 
     # optuna stuff
-    study_dict = UO.create_or_load_study(args, seed, evaluation = False)
+    study_dict = UO.create_or_load_study(args, SEED, evaluation = False)
     if args.eval == False:
         objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
