@@ -111,6 +111,16 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
 
+
+    out_dim = 3
+    if by_category == False:
+        out_dim = 7
+    in_dim = 1536
+    if triple_token_idx < 0:
+        in_dim *= 3
+    model = LinearProbe(in_dim =in_dim, hidden_dims = [], out_dim = out_dim)
+
+
     opt_fn = None
     if wd_exp < -2:
         opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp), weight_decay = 10**(wd_exp)) 
@@ -123,14 +133,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     train_avg_nlls = []
     actual_training_epochs = float('inf')
 
-    out_dim = 3
-    if by_category == False:
-        out_dim = 7
-    in_dim = 1536
-    if triple_token_idx < 0:
-        in_dim *= 3
-    model = LinearProbe(in_dim =in_dim, hidden_dims = [], out_dim = out_dim)
-
+    
     # init rng
     torch_gen = torch.Generator(device=device)
     torch_gen.manual_seed(SEED)
