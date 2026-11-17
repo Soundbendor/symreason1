@@ -1,5 +1,6 @@
 import polars as pl
 import os
+import chords as CH
 
 fname_keys = ['basename', 'csv_basename', 'bass_note', 'prog', 'inv', 'mode', 'idx']
 def get_dataset_df(fdir):
