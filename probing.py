@@ -151,8 +151,8 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
 
     for epoch_idx in range(params['num_epochs']):
         # train/valid
-        train_avg_loss = train_model(model, params['train_size'], torch_gen, opt_fn, train_loss_fn, cur_train_subset, batch_size=batch_size, shuffle = True, device=device)
-        valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], cur_valid_size, torch_gen, valid_loss_fn, cur_valid_subset, batch_size=batch_size, shuffle = True, device=device)
+        train_avg_loss = train_model(model, params['train_size'], torch_gen, opt_fn, train_loss_fn, train_ds, batch_size=batch_size, shuffle = True, device=device)
+        valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], cur_valid_size, torch_gen, valid_loss_fn, valid_ds, batch_size=batch_size, shuffle = True, device=device)
         valid_nlls.append(valid_avg_loss)
         train_avg_nlls.append(train_avg_loss)
         trial.report(valid_avg_loss, step = epoch_idx)
