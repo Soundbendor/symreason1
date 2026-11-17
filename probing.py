@@ -6,6 +6,7 @@ from linear_probe import LinearProbe
 from probe_dataset import ProbeDataset
 
 import util.util_data as UD
+import util.util_probing as UP
 import util.util_optuna as UO
 import util.util_rdb as URDB
 import chords as CH
