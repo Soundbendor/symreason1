@@ -105,7 +105,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             }
 
     lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
-    batch_size = trial.suggest_categorical('batch_size', [1024,2048])
+    batch_size = trial.suggest_categorical('batch_size', [128,256,512])
     wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
     
     # other init
