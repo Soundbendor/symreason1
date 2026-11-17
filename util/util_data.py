@@ -8,10 +8,10 @@ def get_dataset_df(fdir):
     data = {k: [] for k in fname_keys}
     for f in midifiles:
         if "hidden" in f:
-            cur_basename = f.split('.')[0]
-            cur_split = cur_basename.split('-')
+            cur_fname = f.split('.')[0]
+            cur_split = cur_fname.split('-')
             csv_basename = '-'.join(cur_split[1:-1])
-            data['basename'].append(f'{cur_basename}')
+            data['basename'].append('-'.join(cur_split[:-1]))
             data['csv_basename'].append(csv_basename)
             data['bass_note'].append(cur_split[0])
             data['prog'].append(cur_split[1])
