@@ -106,12 +106,15 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             'trial_number': trial.number
             }
 
+    layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
     lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
     wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
     
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
 
+    train_ds.set_layer_idx(layer_idx)
+    valid_ds.set_layer_idx(layer_idx)
 
     out_dim = 3
     if by_category == False:
