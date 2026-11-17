@@ -25,7 +25,7 @@ class ProbeDataset(TUD.Dataset):
         self.layer_idx = idx
 
     def __getitem__(self,idx):
-        cur_row = self.df.row(idx, named=True)
+        cur_row = self.data_df.row(idx, named=True)
         cur_basename = cur_row['basename']
         cur_csv = self.csv_dfs[cur_row['csv_basename']]
         cur_truth = None
