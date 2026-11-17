@@ -15,7 +15,7 @@ class ProbeDataset(TUD.Dataset):
         self.layer_idx = layer_idx
         self.device = device
         self.from_dir = from_dir
-        self.to_torch = to_torch
+        #self.to_torch = to_torch
         self.triple_token_idx = triple_token_idx
 
     def __len__(self):
