@@ -7,16 +7,17 @@ def get_dataset_df(fdir):
     midifiles = os.listdir(fdir)
     data = {k: [] for k in fname_keys}
     for f in midifiles:
-        cur_basename = f.split('.')[0]
-        cur_split = cur_basename.split('-')
-        csv_basename = '-'.join(cur_split[1:])
-        data['basename'].append(f'{cur_basename}')
-        data['csv_basename'].append(csv_basename)
-        data['bass_note'].append(cur_split[0])
-        data['prog'].append(cur_split[1])
-        data['inv'].append(int(cur_split[2][-1]))
-        data['mode'].append(cur_split[3])
-        data['idx'].append(cur_split[4][3:])
+        if "hidden" in f:
+            cur_basename = f.split('.')[0]
+            cur_split = cur_basename.split('-')
+            csv_basename = '-'.join(cur_split[1:-1])
+            data['basename'].append(f'{cur_basename}')
+            data['csv_basename'].append(csv_basename)
+            data['bass_note'].append(cur_split[0])
+            data['prog'].append(cur_split[1])
+            data['inv'].append(int(cur_split[2][-1]))
+            data['mode'].append(cur_split[3])
+            data['idx'].append(cur_split[4][3:])
     return pl.DataFrame(data)
 
 def get_dataset_splits(df, bass_notes,rng):
