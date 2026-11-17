@@ -159,12 +159,12 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
         trial.report(valid_avg_loss, step = epoch_idx)
         # early stopping
         if using_early_stopping == False:
-            best_loss = valid_loss
+            best_loss = valid_avg_loss
         else:
             last_epoch = epoch_idx == (params['num_epochs'] - 1)
             if epoch_idx % params['early_stopping_check_interval'] == 0:
-                if valid_loss < max(best_loss - params['patience_delta'], 0.):
-                    best_loss = valid_loss
+                if valid_avg_loss < max(best_loss - params['patience_delta'], 0.):
+                    best_loss = valid_avg_loss
                     patience = 0
                     best_model_dict = copy.deepcopy(model.state_dict())
                 else:
@@ -176,7 +176,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             elif last_epoch == True:
                 # end of training, just report what you have
                 actual_training_epochs = epoch_idx + 1
-                best_loss = valid_loss
+                best_loss = valid_avg_loss
                 best_model_dict = copy.deepcopy(model.state_dict())
 
 
