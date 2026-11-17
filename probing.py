@@ -216,7 +216,7 @@ if __name__ == "__main__":
         exit()
     data_df = UD.get_dataset_df(ACT_FOLDER)
     # do splits by key with 6/3/3
-    train_df, valid_df, test_df = UD.get_dataset_splits(data_df, CH.bass_note_arr,rng)
+    train_df, valid_df, test_df = UD.get_dataset_splits(data_df, CH.bass_note_arr, np_rng)
 
     train_csvs = UD.get_csv_dfs(train_df, MIDI_CSV_FOLDER)
     valid_csvs = UD.get_csv_dfs(valid_df, MIDI_CSV_FOLDER)
