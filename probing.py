@@ -103,16 +103,16 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
             'trial_number': trial.number
             }
 
-    lr_exp = trial.suggest_int('learning_rate_exp', -4, -1, step=1)
+    lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
     batch_size = trial.suggest_categorical('batch_size', [1024,2048])
-    weight_decay_exp = trial.suggest_int('l2_weight_decay_exp', -4,-2,step=1)
+    wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
     
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
 
     opt_fn = None
-    if weight_decay_exp < -2:
-        opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp), weight_decay = 10**(weight_decay_exp)) 
+    if wd_exp < -2:
+        opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp), weight_decay = 10**(wd_exp)) 
     else:
         opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp)) 
 
@@ -180,15 +180,12 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
     params['best_loss'] = best_loss
     params['actual_training_epochs'] = actual_training_epochs
     params['train_avg_nlls'] = train_avg_nlls
+    params['model_savename'] = f"l_{layer_idx}-lrexp_{lr_exp}-wdexp_{wd_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}"
     for k,v in params.items():
         trial.set_user_attr(key=k, value=v)
-    
-    layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
-    lr_exp = trial.suggest_int('learning_rate_exp', -4, -1, step=1)
-    batch_size = trial.suggest_categorical('batch_size', [2048, 4196])
  
-    by_cat_int = int(by_category)
-    torch.save(model_dict, os.path.join(MODEL_FOLDER, f"l_{layer_idx}-lrexp_{lr_exp}-wdexp_{weight_decay_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}.pt"))
+    by_cat_int = int(params["by_category"])
+    torch.save(best_model_dict, os.path.join(MODEL_FOLDER, f"{params['model_savename']}.pt"))
     return best_loss
 
 
@@ -226,12 +223,17 @@ if __name__ == "__main__":
     valid_ds = ProbeDataset(data_df=valid_df, csv_dfs=valid_csvs, layer_idx=0, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
 
     # optuna stuff
-    studydict = UO.create_or_load_study(args, seed, evaluation = False)
+    study_dict = UO.create_or_load_study(args, seed, evaluation = False)
     if args.eval == False:
         objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
-        studydict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
-        cur_studyname = studydict['study_name']
-        fig = optuna.visualization.plot_intermediate_values(studydict['study'])
+        study_dict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
+        cur_studyname = study_dict['study_name']
+        fig = optuna.visualization.plot_intermediate_values(study_dict['study'])
         fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
-         
+    else:
+        for layer_idx in list(range(17)):
+            param_dict, best_dict, attr_dict = URDB.get_best_params_of_layer_idx(study_dict, layer_idx)
+            eval_dict = URDB.make_eval_param_dict(param_dict, best_dict)
+
+
