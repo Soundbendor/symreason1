@@ -7,6 +7,7 @@ from probe_dataset import ProbeDataset
 
 import util.util_data as UD
 import util.util_optuna as UO
+import util.util_rdb as URDB
 from functools import partial
 from distutils.util import strtobool
 from pathlib import Path
@@ -102,13 +103,18 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
             'trial_number': trial.number
             }
 
-    layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
     lr_exp = trial.suggest_int('learning_rate_exp', -4, -1, step=1)
     batch_size = trial.suggest_categorical('batch_size', [1024,2048])
-
+    weight_decay_exp = trial.suggest_int('l2_weight_decay_exp', -4,-2,step=1)
+    
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
-    opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp)) 
+
+    opt_fn = None
+    if weight_decay_exp < -2:
+        opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp), weight_decay = 10**(weight_decay_exp)) 
+    else:
+        opt_fn = torch.optim.Adam(model.parameters(), lr=10**(lr_exp)) 
 
     
     # outer prequential loop
@@ -182,7 +188,7 @@ def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = Fals
     batch_size = trial.suggest_categorical('batch_size', [2048, 4196])
  
     by_cat_int = int(by_category)
-    torch.save(model_dict, os.path.join(MODEL_FOLDER, f"l_{layer_idx}-lrexp_{lr_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}.pt"))
+    torch.save(model_dict, os.path.join(MODEL_FOLDER, f"l_{layer_idx}-lrexp_{lr_exp}-wdexp_{weight_decay_exp}-bs_{batch_size}-tti_{triple_token_idx}-bc_{by_cat_int}-trial_{trial.number}-{suffix}.pt"))
     return best_loss
 
 
@@ -193,6 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("-rs", "--restart_study", type=strtobool, default=False, help="force restart of optuna study")
     parser.add_argument("-bc", "--by_category", type=strtobool, default=False, help="by category")
     parser.add_argument("-cu", "--use_cuda", type=strtobool, default=True, help="use cuda")
+    parser.add_argument("-ev", "--eval", type=strtobool, default=False, help="eval")
     parser.add_argument("-db", "--debug", type=strtobool, default=False, help="debug")
     parser.add_argument("-tti", "--triple_token_idx", type=int, default=-1, help="triple token index")
     args = parser.parse_args()
@@ -220,9 +227,11 @@ if __name__ == "__main__":
 
     # optuna stuff
     studydict = UO.create_or_load_study(args, seed, evaluation = False)
-    objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
-    callback_arr = [UO.study_callback]
-    studydict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
-    cur_studyname = studydict['study_name']
-    fig = optuna.visualization.plot_intermediate_values(studydict['study'])
-    fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
+    if args.eval == False:
+        objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
+        callback_arr = [UO.study_callback]
+        studydict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
+        cur_studyname = studydict['study_name']
+        fig = optuna.visualization.plot_intermediate_values(studydict['study'])
+        fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
+         

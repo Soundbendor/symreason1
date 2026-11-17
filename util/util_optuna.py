@@ -5,7 +5,8 @@ from pathlib import Path
 search_space = {
         'layer_idx': list(range(17)),
         'lr_exp': [-1, -2, -3, -4],
-        'batch_size': [1024,2048]
+        'batch_size': [1024,2048],
+        'weight_decay_exp': [-2,-3,-4]
         }
 
 SAMPLER_FOLDER = os.path.join(Path(__file__).resolve().parent.parent, 'sampler')
