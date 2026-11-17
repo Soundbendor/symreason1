@@ -89,7 +89,7 @@ def valid_test_model(model, valid_size, generator, loss_fn, valid_subset, batch_
 
 
 
-def _objective(trial, train_ds, valid_ds, triple_token_idx=0, by_category = False, suffix=1, device='cpu'):
+def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_category = False, suffix=1, device='cpu'):
 
 
     params = {
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     # optuna stuff
     study_dict = UO.create_or_load_study(args, SEED, evaluation = False)
     if args.eval == False:
-        objective = partial(_objective,  train_ds, valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
+        objective = partial(_objective,  train_ds = train_ds, valid_ds = valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
         study_dict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
         cur_studyname = study_dict['study_name']
