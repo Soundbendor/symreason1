@@ -22,17 +22,12 @@ def create_study_name(parser_args, seed):
     by_cat_int = int(parser_args.by_category)
     return f"bc_{by_cat_int}-tti_{parser_args.triple_token_idx}-s_{seed}-{parser_args.suffix}"
 
-def record_dict_in_study(studydict, cur_dict):
-    flat_dict = UMN.dict_arrayargs_to_str(cur_dict)
-    for k,v in flat_dict.items():
-        studydict['study'].set_user_attr(k,v)
-
 def create_or_load_study(parser_args, seed, evaluation = False):
     ret = {}
 
     cur_study_name = create_study_name(parser_args, seed)
-    sampler_dir = UMN.by_projpath(SAMPLER_FOLDER, True)
-    rdb_dir = UMN.by_projpath(RDB_FOLDER, True)
+    sampler_dir = SAMPLER_FOLDER
+    rdb_dir = RDB_FOLDER
     sampler_filepath = os.path.join(sampler_dir, f'{cur_study_name}.pkl')
     rdb_filepath = os.path.join(rdb_dir, f'{cur_study_name}.db')
     resuming = False
