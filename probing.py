@@ -94,10 +94,10 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
 
 
     params = {
-            'early_stopping_check_interval': 25,
-            'early_stopping_patience': 1,
+            'early_stopping_check_interval': 1,
+            'early_stopping_patience': 25,
             'num_epochs': 250,
-            'batch_size': 256,
+            'batch_size': 512,
             'patience_delta': 10**(-5),
             'train_size': len(train_ds),
             'valid_size': len(valid_ds),
@@ -109,7 +109,8 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
     lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
     wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
-    
+   
+    print(f'trial {trial.number}: layer {layer_idx}, lr_exp {lr_exp}, wd_exp {wd_exp}')
     # other init
     using_early_stopping =  params['early_stopping_check_interval'] > 0
 
@@ -159,6 +160,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
         valid_avg_loss, valid_truths, valid_preds = valid_test_model(model, params['valid_size'], torch_gen, valid_loss_fn, valid_ds, batch_size=params['batch_size'], shuffle = True, device=device)
         valid_nlls.append(valid_avg_loss)
         train_avg_nlls.append(train_avg_loss)
+        print(f'trial {trial.number}, epoch {epoch_idx}: train {train_avg_loss}, valid {valid_avg_loss}')
         trial.report(valid_avg_loss, step = epoch_idx)
         # early stopping
         if using_early_stopping == False:
