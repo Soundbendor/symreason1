@@ -185,6 +185,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
 
     # bookkeeping
 
+    by_cat_int = int(params["by_category"])
     params['best_loss'] = best_loss
     params['actual_training_epochs'] = actual_training_epochs
     params['train_avg_nlls'] = train_avg_nlls
@@ -192,7 +193,6 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     for k,v in params.items():
         trial.set_user_attr(key=k, value=v)
  
-    by_cat_int = int(params["by_category"])
     torch.save(best_model_dict, os.path.join(MODEL_FOLDER, f"{params['model_savename']}.pt"))
     return best_loss
 
