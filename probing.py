@@ -107,8 +107,8 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             }
 
     layer_idx = trial.suggest_categorical('layer_idx', list(range(17)))
-    lr_exp = trial.suggest_int('lr_exp', -4, -1, step=1)
-    wd_exp = trial.suggest_int('wd_exp', -4,-2,step=1)
+    lr_exp = trial.suggest_int('lr_exp', -3, -2, step=1)
+    wd_exp = trial.suggest_int('wd_exp', -3,-2,step=1)
    
     print(f'trial {trial.number}: layer {layer_idx}, lr_exp {lr_exp}, wd_exp {wd_exp}')
     # other init

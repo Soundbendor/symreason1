@@ -4,8 +4,8 @@ from pathlib import Path
 
 search_space = {
         'layer_idx': list(range(17)),
-        'lr_exp': [-1, -2, -3, -4],
-        'wd_exp': [-2,-3,-4]
+        'lr_exp': [-2, -3],
+        'wd_exp': [-2,-3]
         }
 
 SAMPLER_FOLDER = os.path.join(Path(__file__).resolve().parent.parent, 'sampler')
