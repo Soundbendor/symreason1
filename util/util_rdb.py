@@ -36,7 +36,6 @@ def get_layer_idx_trial_ids(conn, layer_idx):
     tv = pl.read_database(query=f"select * from trial_params where param_name='layer_idx' and param_value={layer_idx}", connection=conn)
     return tv['trial_id'].to_numpy()
 
-
 def get_best_id_val_of_layer_idx(conn, layer_idx):
     idx_arr = get_layer_idx_trial_ids(conn, layer_idx)
     best_row = get_best_id_val_from_trial_ids(conn, idx_arr)
@@ -83,6 +82,13 @@ def get_study_attr(conn):
     ret_dict = {x['key']: json.loads(x['value_json']) for x in study_attr.to_dicts()}
     return ret_dict
 
+def get_trial_user_attr_by_trial_id(conn, trial_id):
+    study_attr = pl.read_database(query = f'select * from trial_user_attributes where trial_id = {trial_id}', connection=conn)
+    ret_dict = {x['key']: json.loads(x['value_json']) for x in study_attr.to_dicts()}
+    return ret_dict
+
+
+
 def get_best_params_of_study(study_dict):
     conn = get_dbconn(study_dict)
     (best_params, best_dict) = get_best_trial_params_of_study(conn)
@@ -96,10 +102,11 @@ def get_best_params_of_layer_idx(study_dict, layer_idx):
     conn = get_dbconn(study_dict)
     (best_params, best_dict) = get_best_trial_params_of_layer_idx(conn, layer_idx)
     param_dict = parse_best_params(best_params)
-    attr_dict = get_study_attr(conn)
+    study_attr_dict = get_study_attr(conn)
+    trial_attr_dict = get_trial_user_attr_by_trial_id(conn, best_dict['trial_id'])
     close_dbconn(conn)
     #param_dict['best_value'] = best_val
-    return (param_dict, best_dict, attr_dict)
+    return (param_dict, best_dict, study_attr_dict, trial_attr_dict)
 
 # ====== FETCHERS OF PARAMS FOR EVAL ======
 def make_eval_param_dict(best_param_dict, best_trial_dict):

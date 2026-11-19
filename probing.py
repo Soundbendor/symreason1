@@ -2,7 +2,7 @@ import torch, torch.utils.data as TUD
 import numpy as np
 from torch import nn
 
-from linear_probe import LinearProbe
+from linear_probe import LinearProbe, init_probe
 from probe_dataset import ProbeDataset
 
 import util.util_data as UD
@@ -117,14 +117,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
     train_ds.set_layer_idx(layer_idx)
     valid_ds.set_layer_idx(layer_idx)
 
-    out_dim = 3
-    if by_category == False:
-        out_dim = 7
-    in_dim = 1536
-    if triple_token_idx < 0:
-        in_dim *= 3
-    model = LinearProbe(in_dim =in_dim, hidden_dims = [], out_dim = out_dim)
-
+    model = init_probe(by_category, triple_token_idx, [])
 
     opt_fn = None
     if wd_exp < -2:
@@ -243,7 +236,12 @@ if __name__ == "__main__":
         fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
     else:
         for layer_idx in list(range(17)):
-            param_dict, best_dict, attr_dict = URDB.get_best_params_of_layer_idx(study_dict, layer_idx)
+            param_dict, best_dict, study_attr_dict, trial_attr_dict = URDB.get_best_params_of_layer_idx(study_dict, layer_idx)
             eval_dict = URDB.make_eval_param_dict(param_dict, best_dict)
-
-
+            model_savename = trial_attr_dict['model_savename']
+            model = init_probe(trial_attr_dict['by_category'], trial_attr_dict['triple_token_idx'], []) 
+            model.load_state_dict(torch.load(
+                os.path.join(MODEL_FOLDER, model_savename),
+                map_location=device,
+                weights_only = False))
+             

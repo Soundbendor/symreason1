@@ -30,3 +30,12 @@ class LinearProbe(nn.Module):
         out = self.layers(x)
         return out
 
+def init_probe(by_category = False, trpile_token_idx = -1, hidden_dims = []):
+    out_dim = 3
+    if by_category == False:
+        out_dim = 7
+    in_dim = 1536
+    if triple_token_idx < 0:
+        in_dim *= 3
+    return LinearProbe(in_dim =in_dim, hidden_dims = hidden_dims, out_dim = out_dim)
+
