@@ -1,6 +1,7 @@
 import torch, torch.utils.data as TUD
 import numpy as np
 from torch import nn
+import optuna
 
 from linear_probe import LinearProbe, init_probe
 from probe_dataset import ProbeDataset
