@@ -203,6 +203,7 @@ if __name__ == "__main__":
     parser.add_argument("-bc", "--by_category", type=strtobool, default=False, help="by category")
     parser.add_argument("-cu", "--use_cuda", type=strtobool, default=True, help="use cuda")
     parser.add_argument("-ev", "--eval", type=strtobool, default=False, help="eval")
+    parser.add_argument("-sg", "--study_graph", type=strtobool, default=False, help="graph study")
     parser.add_argument("-db", "--debug", type=strtobool, default=False, help="debug")
     parser.add_argument("-tti", "--triple_token_idx", type=int, default=-1, help="triple token index")
     args = parser.parse_args()
@@ -230,14 +231,16 @@ if __name__ == "__main__":
 
     # optuna stuff
     study_dict = UO.create_or_load_study(args, SEED, evaluation = args.eval)
-    if args.eval == False:
+    if args.eval == False and args.study_graph == False:
         objective = partial(_objective,  train_ds = train_ds, valid_ds = valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
         study_dict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
         cur_studyname = study_dict['study_name']
+    if args.study_graph == True:
+        # run if eval if false
         fig = optuna.visualization.plot_intermediate_values(study_dict['study'])
         fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
-    else:
+    if args.eval == True:
         for layer_idx in list(range(17)):
             param_dict, best_dict, study_attr_dict, trial_attr_dict = URDB.get_best_params_of_layer_idx(study_dict, layer_idx)
             eval_dict = URDB.make_eval_param_dict(param_dict, best_dict)

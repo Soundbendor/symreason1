@@ -13,12 +13,20 @@ def run_sbatch_script(script_path):
     print(f"Running {script_path} ({cur_idx}/{script_idx})")
     subprocess.run(["sbatch", "-W", f"{script_path}"])
 
+def make_command(py_path, parser_dict, omit_args = ["num_days", "partition", "node", "ram_mem", "gpu", "slurm_job", "num_jobs"]):
+    _script = f'python {py_path}'
+    for arg,val in parser_dict.items():
+        if arg not in omit_args:
+            _script += f" --{arg} {val}"
+    return _script
+
 if __name__ == "__main__":
     #### arg parsing
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-sf", "--suffix", type=int, default=1, help="suffix")
     parser.add_argument("-rs", "--restart_study", type=strtobool, default=False, help="force restart of optuna study")
     parser.add_argument("-ev", "--eval", type=strtobool, default=False, help="eval")
+    parser.add_argument("-sg", "--study_graph", type=strtobool, default=False, help="graph study")
     parser.add_argument("-bc", "--by_category", type=strtobool, default=False, help="by category")
     parser.add_argument("-cu", "--use_cuda", type=strtobool, default=True, help="use cuda")
     parser.add_argument("-db", "--debug", type=strtobool, default=False, help="debug")
@@ -59,7 +67,7 @@ if __name__ == "__main__":
         slurm_strarr2.append(f"#SBATCH -w {args.node}")
     slurm_strarr3 = [f"#SBATCH --mem={args.ram_mem}G", f"#SBATCH --gres=gpu:{args.gpus}", f"#SBATCH -t {args.num_days}-00:00:00", f"#SBATCH --job-name={job_str}", "#SBATCH --export=ALL", f"#SBATCH --output=/nfs/guille/eecs_research/soundbendor/kwand/out_symr1prb/{job_str}-%j.out", ""]
     slurm_strarr = slurm_strarr1 + slurm_strarr2 + slurm_strarr3
-    p_str = f"python {py_path} --suffix {args.suffix} --eval {args.eval} --restart_study {args.restart_study} --by_category {args.by_category} --use_cuda {args.use_cuda} --debug {args.debug} --triple_token_idx {args.triple_token_idx}" 
+    p_str = make_command(py_path, args)
     slurm_strarr.append(p_str)
     script_fname = f"{start_time}_{job_str}.sh"
     script_path = os.path.join(sh_dir, script_fname)
