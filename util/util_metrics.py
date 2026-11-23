@@ -8,6 +8,7 @@ from . import util_chords as CH
 
 CONFMAT_FOLDER = 'confmat'
 RES_CSV_FOLDER = 'res_csv'
+CM_FIGSIZE_S = (5,5)
 # take an array of dicts and turn it in to a dict of arrays
 def accum_metrics_to_metric_dict(accum_metrics):
     ret = {}
@@ -35,7 +36,7 @@ def save_results_to_csv(resdict, save_name):
 def make_confusion_matrix(truths, preds, by_category = False, param_str = '', save_name = ''):
     figsize = None
     hide_labels = True
-    figsize = UC.CM_FIGSIZE_S
+    figsize = CM_FIGSIZE_S
     idx_dict = None
     label_arr = None
     expr_type = None
