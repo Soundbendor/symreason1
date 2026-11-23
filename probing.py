@@ -235,9 +235,9 @@ if __name__ == "__main__":
         objective = partial(_objective,  train_ds = train_ds, valid_ds = valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
         study_dict['study'].optimize(objective, timeout = None, n_trials = None, n_jobs=1, gc_after_trial = True, callbacks=callback_arr)
-        cur_studyname = study_dict['study_name']
     if args.study_graph == True:
         # run if eval if false
+        cur_studyname = study_dict['study_name']
         fig = optuna.visualization.plot_intermediate_values(study_dict['study'])
         fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
     if args.eval == True:
