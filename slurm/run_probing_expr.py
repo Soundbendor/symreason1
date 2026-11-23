@@ -13,7 +13,7 @@ def run_sbatch_script(script_path):
     print(f"Running {script_path} ({cur_idx}/{script_idx})")
     subprocess.run(["sbatch", "-W", f"{script_path}"])
 
-def make_command(py_path, parser_dict, omit_args = ["num_days", "partition", "node", "ram_mem", "gpu", "slurm_job", "num_jobs"]):
+def make_command(py_path, parser_dict, omit_args = ["num_days", "partition", "node", "ram_mem", "gpus", "slurm_job", "num_jobs"]):
     _script = f'python {py_path}'
     for arg,val in parser_dict.items():
         if arg not in omit_args:
