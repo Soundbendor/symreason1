@@ -4,7 +4,7 @@ import os
 import util.util_data as UD
 import util.util_probing as UP
 
-import chords as CH
+import util.util_chords as CH
 
 # triple_token_idx selects the index of the note triple to pick out (-1 selects all)
 class ProbeDataset(TUD.Dataset):
