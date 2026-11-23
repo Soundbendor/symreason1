@@ -113,7 +113,7 @@ def make_eval_param_dict(best_param_dict, best_trial_dict):
     ret = {}
     ret['trial_number'] = best_trial_dict['trial_number']
 
-    for m in ['layer_idx', 'lr_exp', 'weight_decay_exp', 'batch_size']:
+    for m in ['layer_idx', 'lr_exp', 'wd_exp', 'batch_size']:
         ret[m] = best_param_dict[m]['value']
     return ret
    
