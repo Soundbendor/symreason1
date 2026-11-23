@@ -259,4 +259,4 @@ if __name__ == "__main__":
             
             test_avg_loss, test_truths, test_preds = valid_test_model(model, len(test_ds), torch_gen, test_loss_fn, test_ds, batch_size=BATCH_SIZE, shuffle = True, device=device)
             param_str = f"Layer {layer_idx}, BS = {BATCH_SIZE}, LR_EXP = {param_dict['lr_exp']}, WD_EXP = {param_dict['wd_exp']}"
-            res = UME.get_classification_metrics(test_truths, test_preds, by_category = trial_attr_dict['by_category'], param_str = param_str, save_name = model_savename, make_cm = True)
+            res = UME.get_classification_metrics(test_truths, test_preds, layer_idx = layer_idx, by_category = trial_attr_dict['by_category'], param_str = param_str, save_name = model_savename, make_cm = True)

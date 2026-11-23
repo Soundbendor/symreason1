@@ -79,7 +79,7 @@ def make_confusion_matrix(truths, preds, by_category = False, param_str = '', sa
 
 
 # make_cm = make confusion matrix
-def get_classification_metrics(truths, preds, by_category = False, param_str = '', save_name = '', make_cm = False):
+def get_classification_metrics(truths, preds, layer_idx = 0, by_category = False, param_str = '', save_name = '', make_cm = False):
 
     ret = {} 
     ret['layer_idx'] = layer_idx
