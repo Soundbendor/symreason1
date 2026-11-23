@@ -8,9 +8,10 @@ from probe_dataset import ProbeDataset
 
 import util.util_data as UD
 import util.util_probing as UP
+import util.util_metrics as UME
 import util.util_optuna as UO
 import util.util_rdb as URDB
-import chords as CH
+import util.util_chords as CH
 from functools import partial
 from distutils.util import strtobool
 from pathlib import Path
@@ -227,7 +228,7 @@ if __name__ == "__main__":
     valid_ds = ProbeDataset(data_df=valid_df, csv_dfs=valid_csvs, layer_idx=0, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
 
     # optuna stuff
-    study_dict = UO.create_or_load_study(args, SEED, evaluation = False)
+    study_dict = UO.create_or_load_study(args, SEED, evaluation = args.eval)
     if args.eval == False:
         objective = partial(_objective,  train_ds = train_ds, valid_ds = valid_ds, triple_token_idx=args.triple_token_idx, by_category = args.by_category, suffix=args.suffix, device=device)
         callback_arr = [UO.study_callback]
@@ -242,7 +243,18 @@ if __name__ == "__main__":
             model_savename = trial_attr_dict['model_savename']
             model = init_probe(trial_attr_dict['by_category'], trial_attr_dict['triple_token_idx'], []) 
             model.load_state_dict(torch.load(
-                os.path.join(MODEL_FOLDER, model_savename),
+                os.path.join(MODEL_FOLDER, f'{model_savename}.pt'),
                 map_location=device,
                 weights_only = False))
-             
+            # init rng
+            torch_gen = torch.Generator(device=device)
+            torch_gen.manual_seed(SEED)
+            set_torch_seed(SEED)
+
+            test_loss_fn = nn.CrossEntropyLoss(reduction='sum')
+
+            test_csvs = UD.get_csv_dfs(test_df, MIDI_CSV_FOLDER)
+            test_ds = ProbeDataset(data_df=test_df, csv_dfs=test_csvs, layer_idx=layer_idx, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
+            
+            test_avg_loss, test_truths, test_preds = valid_test_model(model, len(test_ds), torch_gen, test_loss_fn, test_ds, batch_size=param_dict['batch_size'], shuffle = True, device=device)
+            res = UME.get_classification_metrics(truths, preds, by_category = args.by_category, param_str = '', save_name = model_savename, make_cm = True)
