@@ -239,6 +239,7 @@ if __name__ == "__main__":
         # run if eval if false
         cur_studyname = study_dict['study_name']
         fig = optuna.visualization.plot_intermediate_values(study_dict['study'])
+        # requires kaleido
         fig.write_image(os.path.join(GRAPH_FOLDER, f"{cur_studyname}.webp"))
     if args.eval == True:
         for layer_idx in list(range(17)):

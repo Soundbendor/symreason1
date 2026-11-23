@@ -9,6 +9,13 @@ def run_sbatch_script(script_path):
     print(f"Running {script_path}")
     subprocess.run(["sbatch", "-W", f"{script_path}"])
 
+def make_command(py_path, parser_dict, omit_args = ["num_days", "partition", "node", "ram_mem", "gpus", "slurm_job", "num_jobs"]):
+    _script = f'python {py_path}'
+    for arg,val in parser_dict.items():
+        if arg not in omit_args:
+            _script += f" --{arg} {val}"
+    return _script
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-nd", "--num_days", type=int, default=1, help="number of days")

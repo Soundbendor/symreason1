@@ -51,6 +51,8 @@ def make_confusion_matrix(truths, preds, by_category = False, param_str = '', sa
     num_classes = len(label_arr)
     # plot confusion matrix
     fig, ax = plt.subplots(figsize=figsize)
+    title = f'{expr_type} Results ({param_str})'
+    ax.set_title(title)
     # convert indices to class strings before feeding into confusion matrix
     cmd = SKM.ConfusionMatrixDisplay.from_predictions(
             [idx_dict[x] for x in truths],
@@ -69,8 +71,6 @@ def make_confusion_matrix(truths, preds, by_category = False, param_str = '', sa
         ax.set_yticks(tick_positions)
         ax.set_yticklabels(tick_positions, fontsize=9)
 
-    title = f'{expr_type} Results ({param_str})'
-    ax.set_title(title)
     fig.tight_layout()
     save_path = os.path.join(CONFMAT_FOLDER, f'{save_name}.png')
     plt.savefig(save_path)
