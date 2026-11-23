@@ -19,6 +19,7 @@ import os, sys, time, argparse, copy
 
 
 SEED = 39
+BATCH_SIZE = 512
 MIDI_FOLDER = os.path.join(Path(__file__).resolve().parent, 'midi')
 MIDI_CSV_FOLDER = os.path.join(Path(__file__).resolve().parent, 'midi_csv')
 GRAPH_FOLDER = os.path.join(Path(__file__).resolve().parent, 'graph')
@@ -99,7 +100,7 @@ def _objective(trial, train_ds = None, valid_ds = None, triple_token_idx=0, by_c
             'early_stopping_check_interval': 1,
             'early_stopping_patience': 25,
             'num_epochs': 250,
-            'batch_size': 512,
+            'batch_size': BATCH_SIZE,
             'patience_delta': 10**(-5),
             'train_size': len(train_ds),
             'valid_size': len(valid_ds),
@@ -256,5 +257,5 @@ if __name__ == "__main__":
             test_csvs = UD.get_csv_dfs(test_df, MIDI_CSV_FOLDER)
             test_ds = ProbeDataset(data_df=test_df, csv_dfs=test_csvs, layer_idx=layer_idx, from_dir = ACT_FOLDER , triple_token_idx = args.triple_token_idx, by_category = args.by_category, device=device)
             
-            test_avg_loss, test_truths, test_preds = valid_test_model(model, len(test_ds), torch_gen, test_loss_fn, test_ds, batch_size=param_dict['batch_size'], shuffle = True, device=device)
+            test_avg_loss, test_truths, test_preds = valid_test_model(model, len(test_ds), torch_gen, test_loss_fn, test_ds, batch_size=BATCH_SIZE, shuffle = True, device=device)
             res = UME.get_classification_metrics(truths, preds, by_category = args.by_category, param_str = '', save_name = model_savename, make_cm = True)
